@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>墨记 · 个人笔记</title>
+  <style>
+    :root { --bg:#f7f7f5; --panel:#fff; --ink:#252523; --muted:#85857f; --line:#e9e9e5; --accent:#df6c47; --accent-soft:#fff1eb; --shadow:0 12px 30px rgba(37,37,35,.06); }
+    * { box-sizing:border-box; }
+    body { margin:0; min-width:320px; color:var(--ink); background:var(--bg); font:14px/1.55 Inter, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    button, input, textarea { font:inherit; }
+    button { cursor:pointer; border:0; }
+    .app { min-height:100vh; display:grid; grid-template-columns:250px 330px minmax(0,1fr); }
+    .sidebar { padding:28px 18px; background:#f0f0ed; border-right:1px solid var(--line); display:flex; flex-direction:column; gap:28px; }
+    .brand { display:flex; align-items:center; gap:10px; padding:0 10px; font-weight:750; font-size:19px; letter-spacing:.04em; }
+    .brand-mark { display:grid; place-items:center; width:29px; height:29px; border-radius:9px; background:var(--ink); color:#fff; font-family:Georgia,serif; }
+    .new-note { padding:11px 14px; border-radius:10px; color:#fff; background:var(--accent); box-shadow:0 5px 12px rgba(223,108,71,.22); text-align:left; font-weight:650; }
+    .new-note span { font-size:19px; vertical-align:-1px; margin-right:7px; font-weight:400; }
+    .nav-label { margin:0 10px 7px; color:var(--muted); font-size:11px; font-weight:700; letter-spacing:.09em; }
+    .nav { display:grid; gap:3px; }
+    .nav-item { width:100%; padding:9px 10px; display:flex; justify-content:space-between; align-items:center; border-radius:8px; color:#4d4d49; background:transparent; text-align:left; }
+    .nav-item:hover, .nav-item.active { background:#fff; color:var(--ink); box-shadow:0 2px 7px rgba(0,0,0,.025); }
+    .nav-icon { width:23px; display:inline-block; color:var(--muted); }
+    .nav-count { color:#aaa9a3; font-size:12px; }
+    .tags { display:flex; flex-wrap:wrap; gap:7px; padding:0 10px; }
+    .tag { padding:3px 9px; border-radius:99px; background:#e6e6e2; color:#656560; font-size:12px; }
+    .tip { margin-top:auto; padding:13px; border-radius:11px; background:#e8e8e4; color:#6c6c66; font-size:12px; }
+    .note-list { min-width:0; padding:26px 17px; background:#fbfbfa; border-right:1px solid var(--line); }
+    .list-head { display:flex; align-items:center; justify-content:space-between; margin:0 6px 18px; }
+    h1 { margin:0; font-size:21px; letter-spacing:-.03em; }
+    .sort { color:var(--muted); background:transparent; font-size:12px; }
+    .search { position:relative; margin-bottom:16px; }
+    .search input { width:100%; border:1px solid transparent; outline:0; background:#f0f0ed; padding:10px 12px 10px 33px; border-radius:9px; color:var(--ink); }
+    .search input:focus { border-color:#d4d4ce; background:white; }
+    .search::before { content:'⌕'; position:absolute; left:11px; top:7px; color:#9a9a94; font-size:18px; }
+    .cards { display:grid; gap:8px; }
+    .note-card { border:1px solid transparent; background:transparent; padding:13px; border-radius:10px; text-align:left; transition:.15s; }
+    .note-card:hover { background:#fff; }
+    .note-card.selected { background:#fff; border-color:#e2e2dc; box-shadow:var(--shadow); }
+    .card-top { display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
+    .note-title { font-weight:700; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+    .note-date { color:#aaa9a3; font-size:11px; white-space:nowrap; }
+    .preview { margin-top:4px; color:#85857f; font-size:12px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+    .editor { min-width:0; display:flex; flex-direction:column; background:var(--panel); }
+    .editor-top { min-height:73px; padding:16px 34px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); }
+    .crumb { color:var(--muted); font-size:12px; }
+    .crumb b { color:#666660; font-weight:600; }
+    .actions { display:flex; gap:4px; }
+    .icon-btn { width:34px; height:34px; border-radius:8px; background:transparent; color:#74746e; font-size:17px; }
+    .icon-btn:hover { background:#f5f5f2; color:var(--ink); }
+    .editor-body { width:min(780px,100%); padding:51px 56px 90px; margin:0 auto; }
+    #title { width:100%; padding:0; outline:0; border:0; color:var(--ink); font-size:34px; line-height:1.25; font-weight:760; letter-spacing:-.05em; }
+    #title::placeholder, #content::placeholder { color:#c2c2bc; }
+    .meta { display:flex; align-items:center; gap:9px; margin:17px 0 30px; color:#999993; font-size:12px; }
+    .dot { width:3px; height:3px; border-radius:50%; background:#bbb; }
+    .editor-tags { display:flex; gap:6px; margin-left:auto; }
+    .editor-tag { border:0; border-radius:99px; padding:3px 9px; color:#b65435; background:var(--accent-soft); font-size:11px; }
+    #content { width:100%; min-height:380px; resize:none; border:0; outline:0; padding:0; color:#55554f; font:16px/1.95 Georgia, "Noto Serif SC", "Songti SC", serif; }
+    .empty { color:#aaa9a3; text-align:center; padding:40px 8px; }
+    @media (max-width:900px) { .app { grid-template-columns:210px 285px minmax(0,1fr); } .editor-body { padding:44px 32px; } }
+    @media (max-width:720px) { .app { grid-template-columns:1fr; } .sidebar { display:none; } .note-list { display:none; } .editor-top { padding:13px 18px; } .editor-body { padding:35px 23px; } #title { font-size:29px; } .mobile-list { display:block; } }
+    .mobile-list { display:none; }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">M</span>墨记</div>
+      <button class="new-note" id="newNote"><span>＋</span>新建笔记</button>
+      <section><p class="nav-label">我的笔记</p><nav class="nav">
+        <button class="nav-item active" data-filter="all"><span><i class="nav-icon">◧</i>全部笔记</span><span class="nav-count" id="allCount">0</span></button>
+        <button class="nav-item" data-filter="favorites"><span><i class="nav-icon">☆</i>收藏</span><span class="nav-count" id="favCount">0</span></button>
+        <button class="nav-item" data-filter="archive"><span><i class="nav-icon">⌑</i>归档</span></button>
+        <button class="nav-item" data-filter="trash"><span><i class="nav-icon">♲</i>回收站</span></button>
+      </nav></section>
+      <section><p class="nav-label">标签</p><div class="tags"><span class="tag">工作</span><span class="tag">生活</span><span class="tag">灵感</span><span class="tag">阅读</span></div></section>
+      <div class="tip">⌘ + K 可以快速搜索笔记</div>
+    </aside>
+    <section class="note-list">
+      <div class="list-head"><h1 id="listTitle">全部笔记</h1><button class="sort">最近编辑 ▾</button></div>
+      <div class="search"><input id="search" placeholder="搜索笔记" aria-label="搜索笔记" /></div>
+      <div class="cards" id="cards"></div>
+    </section>
+    <section class="editor">
+      <header class="editor-top"><div class="crumb">我的笔记 / <b id="folderName">全部笔记</b></div><div class="actions">
+        <button class="icon-btn" id="favorite" title="收藏">☆</button><button class="icon-btn" id="archive" title="归档">⌑</button><button class="icon-btn" id="delete" title="移至回收站">⌫</button>
+      </div></header>
+      <div class="editor-body">
+        <button class="mobile-list new-note" id="mobileNew">＋ 新建笔记</button>
+        <input id="title" placeholder="无标题笔记" aria-label="笔记标题" />
+        <div class="meta"><span id="updateTime">刚刚编辑</span><span class="dot"></span><span id="wordCount">0 字</span><div class="editor-tags"><span class="editor-tag">个人</span></div></div>
+        <textarea id="content" placeholder="从这里开始记录…" aria-label="笔记正文"></textarea>
+      </div>
+    </section>
+  </main>
+  <script>
+    const seed = [
+      {id:1,title:'七月计划',content:'这个月想把时间留给真正重要的事。\n\n1. 完成阅读清单里的两本书\n2. 每周跑步至少三次\n3. 整理并发布个人作品集',date:'今天',favorite:true,archived:false,deleted:false},
+      {id:2,title:'产品灵感：更安静的待办',content:'待办不应制造焦虑。它更像一盏小灯，在需要时提醒你。',date:'昨天',favorite:false,archived:false,deleted:false},
+      {id:3,title:'周末的咖啡店',content:'窗边的光线很好，适合带一本书坐一下午。下次试试他们的冰滴。',date:'7月 9日',favorite:true,archived:false,deleted:false},
+      {id:4,title:'读书摘录',content:'“我们必须时时提醒自己，不要被生活中的琐事淹没。”',date:'7月 6日',favorite:false,archived:false,deleted:false}
+    ];
+    let notes = JSON.parse(localStorage.getItem('moji-notes') || 'null') || seed;
+    let selectedId = notes[0]?.id, filter = 'all', query = '';
+    const $ = s => document.querySelector(s);
+    const title = $('#title'), content = $('#content');
+    function save(){ localStorage.setItem('moji-notes', JSON.stringify(notes)); }
+    function visible(){ return notes.filter(n => (filter==='all' || filter==='favorites'&&n.favorite || filter==='archive'&&n.archived || filter==='trash'&&n.deleted) && (filter==='trash'||!n.deleted) && (filter==='archive'||!n.archived) && (!query || (n.title+n.content).toLowerCase().includes(query.toLowerCase()))); }
+    function active(){ return notes.find(n=>n.id===selectedId); }
+    function render(){
+      const list=visible(); if (!list.some(n=>n.id===selectedId)) selectedId=list[0]?.id;
+      $('#cards').innerHTML=list.length ? list.map(n=>`<button class="note-card ${n.id===selectedId?'selected':''}" data-id="${n.id}"><div class="card-top"><span class="note-title">${escapeHtml(n.title||'无标题笔记')}</span><span class="note-date">${n.date}</span></div><div class="preview">${escapeHtml(n.content.replace(/\n/g,' '))}</div></button>`).join('') : '<div class="empty">这里还没有笔记</div>';
+      const n=active(); title.value=n?.title||''; content.value=n?.content||''; $('#favorite').textContent=n?.favorite?'★':'☆'; $('#folderName').textContent=$('#listTitle').textContent;
+      $('#allCount').textContent=notes.filter(n=>!n.deleted&&!n.archived).length; $('#favCount').textContent=notes.filter(n=>n.favorite&&!n.deleted&&!n.archived).length; words();
+    }
+    function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+    function words(){ $('#wordCount').textContent=(title.value+content.value).replace(/\s/g,'').length+' 字'; }
+    function edit(){ const n=active(); if(!n)return; n.title=title.value; n.content=content.value; n.date='刚刚'; $('#updateTime').textContent='刚刚编辑'; save(); words(); renderCardsOnly(); }
+    function renderCardsOnly(){ const n=active(); document.querySelectorAll('.note-card').forEach(c=>{if(+c.dataset.id===n.id){ c.querySelector('.note-title').textContent=n.title||'无标题笔记';c.querySelector('.preview').textContent=n.content.replace(/\n/g,' ');c.querySelector('.note-date').textContent=n.date; }}); }
+    function newNote(){ const n={id:Date.now(),title:'',content:'',date:'刚刚',favorite:false,archived:false,deleted:false}; notes.unshift(n); selectedId=n.id; filter='all'; document.querySelector('[data-filter="all"]').click(); save(); render(); title.focus(); }
+    $('#cards').addEventListener('click',e=>{const c=e.target.closest('.note-card');if(c){selectedId=+c.dataset.id;render();}});
+    $('#newNote').onclick=$('#mobileNew').onclick=newNote;
+    title.addEventListener('input',edit); content.addEventListener('input',edit);
+    $('#search').addEventListener('input',e=>{query=e.target.value;render();});
+    document.querySelectorAll('[data-filter]').forEach(btn=>btn.onclick=()=>{filter=btn.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===btn));const labels={all:'全部笔记',favorites:'收藏',archive:'归档',trash:'回收站'};$('#listTitle').textContent=labels[filter];render();});
+    $('#favorite').onclick=()=>{const n=active();if(n){n.favorite=!n.favorite;save();render();}};
+    $('#archive').onclick=()=>{const n=active();if(n){n.archived=!n.archived;save();render();}};
+    $('#delete').onclick=()=>{const n=active();if(n){n.deleted=true;save();render();}};
+    document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('#search').focus();}});
+    render();
+  </script>
+</body>
+</html>
