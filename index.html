@@ -13,8 +13,25 @@
         --muted: #84778f;
         --line: #e9e3f0;
         --accent: #7c4dce;
+        --accent-shadow: rgba(124, 77, 206, .28);
         --accent-soft: #f1eaff;
         --shadow: 0 12px 30px rgba(56, 35, 86, .09);
+        --sidebar: #f1edf7;
+        --list-bg: #fcfaff;
+        --field: #f1edf7;
+        --tag-bg: #e8e0f2;
+        --tag-ink: #665773;
+        --tip-bg: #e9e2f2;
+        --tip-ink: #6d5e79;
+        --focus: #c9b9dc;
+        --subtle: #aa9eb4;
+        --icon: #75667f;
+        --placeholder: #c6b9d0;
+        --meta: #9789a2;
+        --dot: #b6a9c0;
+        --body-ink: #493d54;
+        --soft-ink: #50445c;
+        --accent-ink: #6537aa;
       }
 
       * {
@@ -81,7 +98,7 @@
         border-radius: 10px;
         color: #fff;
         background: var(--accent);
-        box-shadow: 0 5px 12px rgba(124, 77, 206, .28);
+        box-shadow: 0 5px 12px var(--accent-shadow);
         text-align: left;
         font-weight: 650;
       }
@@ -384,6 +401,63 @@
         padding: 40px 8px;
       }
 
+      /* Theme tokens make the full interface react to the color picker. */
+      .sidebar { background: var(--sidebar); }
+      .note-list { background: var(--list-bg); }
+      .search input { background: var(--field); }
+      .search input:focus { border-color: var(--focus); }
+      .tag { background: var(--tag-bg); color: var(--tag-ink); }
+      .tip { background: var(--tip-bg); color: var(--tip-ink); }
+      .nav-item { color: var(--soft-ink); }
+      .search::before { color: var(--meta); }
+      .note-card.selected { border-color: var(--line); }
+      .crumb b { color: var(--tag-ink); }
+      .icon-btn:hover { background: var(--field); }
+      .nav-count, .note-date, .empty { color: var(--subtle); }
+      .icon-btn { color: var(--icon); }
+      #title::placeholder, #content::placeholder { color: var(--placeholder); }
+      .meta { color: var(--meta); }
+      .dot { background: var(--dot); }
+      .editor-tag { color: var(--accent-ink); }
+      #content { color: var(--body-ink); }
+
+      .theme-toggle {
+        position: fixed;
+        right: 22px;
+        bottom: 22px;
+        z-index: 5;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        color: #fff;
+        background: var(--accent);
+        box-shadow: 0 8px 20px var(--accent-shadow);
+        font-size: 19px;
+      }
+
+      .theme-panel {
+        position: fixed;
+        right: 22px;
+        bottom: 76px;
+        z-index: 5;
+        width: 230px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        color: var(--ink);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .theme-panel[hidden] { display: none; }
+      .theme-panel h2 { margin: 0 0 4px; font-size: 14px; }
+      .theme-panel p { margin: 0 0 13px; color: var(--muted); font-size: 12px; }
+      .theme-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      .theme-color { width: 36px; height: 32px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+      .theme-presets { display: flex; gap: 7px; margin-top: 13px; }
+      .theme-preset { width: 23px; height: 23px; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 0 1px var(--line); }
+      .theme-reset { margin-top: 14px; padding: 0; color: var(--accent); background: transparent; font-size: 12px; }
+
       @media (max-width:900px) {
         .app {
           grid-template-columns: 210px 285px minmax(0, 1fr);
@@ -478,6 +552,23 @@
         </div>
       </section>
     </main>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="打开主题调色盘" aria-expanded="false">◐</button>
+    <section class="theme-panel" id="themePanel" hidden aria-label="主题调色盘">
+      <h2>主题调色盘</h2>
+      <p>选择主色，界面会即时生成协调的配色。</p>
+      <div class="theme-controls">
+        <label for="themeColor">自定义颜色</label>
+        <input class="theme-color" id="themeColor" type="color" value="#7c4dce" aria-label="自定义主题颜色" />
+      </div>
+      <div class="theme-presets" aria-label="推荐颜色">
+        <button class="theme-preset" type="button" data-color="#7c4dce" style="background:#7c4dce" aria-label="紫色"></button>
+        <button class="theme-preset" type="button" data-color="#2563eb" style="background:#2563eb" aria-label="蓝色"></button>
+        <button class="theme-preset" type="button" data-color="#0f9d7a" style="background:#0f9d7a" aria-label="绿色"></button>
+        <button class="theme-preset" type="button" data-color="#d1495b" style="background:#d1495b" aria-label="红色"></button>
+        <button class="theme-preset" type="button" data-color="#d97706" style="background:#d97706" aria-label="橙色"></button>
+      </div>
+      <button class="theme-reset" id="themeReset" type="button">恢复默认紫色</button>
+    </section>
     <script>
       const seed = [
         { id: 1, title: '七月计划', content: '这个月想把时间留给真正重要的事。\n\n1. 完成阅读清单里的两本书\n2. 每周跑步至少三次\n3. 整理并发布个人作品集', date: '今天', favorite: true, archived: false, deleted: false },
@@ -489,6 +580,69 @@
       let selectedId = notes[0]?.id, filter = 'all', query = '';
       const $ = s => document.querySelector(s);
       const title = $('#title'), content = $('#content');
+      const DEFAULT_THEME = '#7c4dce';
+      const root = document.documentElement;
+
+      function hexToHsl(hex) {
+        const value = hex.replace('#', '');
+        const r = parseInt(value.slice(0, 2), 16) / 255;
+        const g = parseInt(value.slice(2, 4), 16) / 255;
+        const b = parseInt(value.slice(4, 6), 16) / 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b), delta = max - min;
+        let h = 0, s = 0, l = (max + min) / 2;
+        if (delta) {
+          s = delta / (1 - Math.abs(2 * l - 1));
+          if (max === r) h = ((g - b) / delta + (g < b ? 6 : 0)) * 60;
+          else if (max === g) h = ((b - r) / delta + 2) * 60;
+          else h = ((r - g) / delta + 4) * 60;
+        }
+        return [Math.round(h), Math.round(s * 100), Math.round(l * 100)];
+      }
+
+      function applyTheme(hex, persist = false) {
+        const [h, s] = hexToHsl(hex);
+        const color = (lightness, saturation = s) => `hsl(${h} ${Math.min(saturation, 65)}% ${lightness}%)`;
+        const tokens = {
+          '--accent': hex,
+          '--accent-shadow': `hsla(${h}, ${Math.min(s + 5, 75)}%, 45%, .28)`,
+          '--accent-soft': color(95, 55),
+          '--bg': color(98, 35),
+          '--ink': color(20, 34),
+          '--muted': color(52, 20),
+          '--line': color(92, 32),
+          '--shadow': `0 12px 30px hsla(${h}, 32%, 28%, .09)`,
+          '--sidebar': color(95, 42),
+          '--list-bg': color(98, 45),
+          '--field': color(95, 42),
+          '--tag-bg': color(91, 42),
+          '--tag-ink': color(38, 24),
+          '--tip-bg': color(91, 38),
+          '--tip-ink': color(42, 21),
+          '--focus': color(78, 38),
+          '--subtle': color(66, 18),
+          '--icon': color(50, 20),
+          '--placeholder': color(78, 23),
+          '--meta': color(61, 19),
+          '--dot': color(71, 18),
+          '--body-ink': color(29, 23),
+          '--soft-ink': color(31, 25),
+          '--accent-ink': color(39, 58)
+        };
+        Object.entries(tokens).forEach(([name, value]) => root.style.setProperty(name, value));
+        $('#themeColor').value = hex;
+        if (persist) localStorage.setItem('moji-theme-color', hex);
+      }
+
+      $('#themeToggle').onclick = () => {
+        const panel = $('#themePanel'), visible = panel.hidden;
+        panel.hidden = !visible;
+        $('#themeToggle').setAttribute('aria-expanded', String(visible));
+      };
+      $('#themeColor').addEventListener('input', e => applyTheme(e.target.value, true));
+      document.querySelectorAll('.theme-preset').forEach(button => button.onclick = () => applyTheme(button.dataset.color, true));
+      $('#themeReset').onclick = () => applyTheme(DEFAULT_THEME, true);
+      applyTheme(localStorage.getItem('moji-theme-color') || DEFAULT_THEME);
+
       function save() { localStorage.setItem('moji-notes', JSON.stringify(notes)); }
       function visible() { return notes.filter(n => (filter === 'all' || filter === 'favorites' && n.favorite || filter === 'archive' && n.archived || filter === 'trash' && n.deleted) && (filter === 'trash' || !n.deleted) && (filter === 'archive' || !n.archived) && (!query || (n.title + n.content).toLowerCase().includes(query.toLowerCase()))); }
       function active() { return notes.find(n => n.id === selectedId); }
